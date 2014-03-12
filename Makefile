@@ -15,7 +15,7 @@ LDFLAGS      ?=
 PREFIX       ?= /usr/local
 DESTDIR      ?= lib
 
-EXTS         := '.*\.\(c\(pp\|xx\)?\|C\)'
+EXTS         := '.*\.\(c\(c\|pp\|xx\)?\|C\)'
 DEPCFLAGS    := $(INCS) -I$(LIBSDIR) -MMD -MP
 SRCS         := $(shell find $(SRCDIR) $(LIBSDIR) -type f -regex $(EXTS))
 TESTSRCS     := $(shell find $(TESTDIR) -type f -regex $(EXTS))
