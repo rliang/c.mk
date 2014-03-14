@@ -1,50 +1,50 @@
-TARGET       := libfoo.so
-INCS         :=
-LDLIBS       :=
-SRCDIR       := src
-LIBSDIR      := libs
-TESTDIR      := test
-TESTER       := valgrind --leak-check=full --error-exitcode=1
-TESTCFLAGS   := -O0 -pipe -g -Wall -Wextra
-TESTLDFLAGS  :=
-DISTCFLAGS   := -DNDEBUG -fPIC
-DISTLDFLAGS  := -shared
-CFLAGS       ?= -Os -pipe -march=native
-CXXFLAGS     ?= $(CFLAGS)
-LDFLAGS      ?=
-PREFIX       ?= /usr/local
-DESTDIR      ?= lib
+TARGET   := libfoo.so
+RCFLAGS  := -Os -march=native -fPIC
+RLCFLAGS := -s -shared
+DCFLAGS  := -O0 -g -fPIC
+DLDFLAGS := -shared
+TCFLAGS  := -O0 -g
+TLDFLAGS :=
+CFLAGS   += -Ilibs
+LDFLAGS  += -Llibs
+PREFIX   ?= /usr/local/
+DESTDIR  ?= lib
 
-EXTS         := '.*\.\(c\(c\|pp\|xx\)?\|C\)'
-DEPCFLAGS    := $(INCS) -I$(LIBSDIR) -MMD -MP
-SRCS         := $(shell find $(SRCDIR) $(LIBSDIR) -type f -regex $(EXTS))
-TESTSRCS     := $(shell find $(TESTDIR) -type f -regex $(EXTS))
-OBJS         := $(addsuffix .o, $(basename $(SRCS)))
-DEPS         := $(addsuffix .d, $(basename $(SRCS) $(TESTSRCS)))
-TESTS        := $(basename $(TESTSRCS))
-TESTLOGS     := $(addsuffix .log, $(TESTS))
+OSRCS := $(wildcard src/*.c src/**/*.c)
+ROBJS := $(patsubst src/%.c, build/release/%.o, $(OSRCS))
+DOBJS := $(patsubst src/%.c, build/debug/%.o, $(OSRCS))
+TSRCS := $(wildcard test/*.c test/**/*.c)
+TOBJS := $(patsubst src/%.c, build/test/%.o, $(OSRCS))
+TESTS := $(patsubst test/%.c, build/test/%.out, $(TSRCS))
 
-all: CFLAGS += $(DISTCFLAGS) $(DEPCFLAGS)
-all: CXXFLAGS += $(DISTCFLAGS) $(DEPCFLAGS)
-all: LDFLAGS += $(DISTLDFLAGS)
-all: $(TARGET)
+release: build/release/$(TARGET)
+build/release/$(TARGET): $(ROBJS)
+	$(CC) $(RLDFLAGS) $(LDFLAGS) -o $@ $^
+build/release/%.o: src/%.c | build/release
+	$(CC) $(RCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
-test: CFLAGS := $(TESTCFLAGS) $(DEPCFLAGS)
-test: CXXFLAGS := $(TESTCFLAGS) $(DEPCFLAGS)
-test: LDFLAGS := $(TESTLDFLAGS)
-test: $(TESTS) $(TESTLOGS)
+debug: build/debug/$(TARGET)
+build/debug/$(TARGET): $(DOBJS)
+	$(CC) $(DLDFLAGS) $(LDFLAGS) -Llibs -o $@ $^
+build/debug/%.o: src/%.c | build/debug
+	$(CC) $(DCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
-install: $(TARGET)
+test: $(TESTS)
+build/test/%.out: $(TOBJS) test/%.c
+	$(CC) $(TCFLAGS) $(CFLAGS) $(TLDFLAGS) $(LDFLAGS) -o $@ $^
+	./$@
+build/test/%.o: src/%.c | build/test
+	$(CC) $(TCFLAGS) $(CFLAGS) -MMD -MP -D'main(a)'='unused(a)' -o $@ -c $<
+
+-include $(addsuffix .d, $(basename $(ROBJS) $(DOBJS) $(TOBJS)))
+
+build/release build/debug build/test:
+	mkdir -p $@
+
+install: release
 	install -d $(PREFIX)/$(DESTDIR)
-	install $< $(PREFIX)/$(DESTDIR)
+	install build/release/$(TARGET) $(PREFIX)/$(DESTDIR)
 
 clean:
-	$(RM) $(OBJS) $(DEPS) $(TESTS) $(TESTLOGS) $(TARGET)
+	rm -r build
 
-$(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(LDLIBS) -o $@ $^
-
-%.log: %
-	$(TESTER) ./$< &> $@
-
--include $(DEPS)

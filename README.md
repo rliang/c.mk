@@ -2,39 +2,30 @@
 
 Generic Makefile for C/C++ projects.
 
-## Features
+## C++
 
-### Executable/Library Generation
+To use it in C++ projects issue the following command:
+
+```sh
+for i in 'CC/CXX' 'CFLAGS/CXXFLAGS' '\.c/\.cpp'; do sed -i "s/$i/g" Makefile; done
+```
+
+Or any other C++ source extension instead of `.cpp`.
+
+## Executable/Library Generation
 
 By default a shared library is generated. To make an executable, remove `-fPIC`
-from `DISTCFLAGS` and `-shared` from `DISTLDFLAGS`.
+from the `R|DCFLAGS` variables and `-shared` from `R|DLDFLAGS`.
 
-### Multi-Extension Sources
+## Automated Testing
 
-Supported extensions are `c`, `C`, `cpp`, `cxx`, as defined in the `EXTS`
-variable.
+Just place the test sources in `test` and run `make test`. All project sources
+are linked, but without `main()`.
 
-Make automatically detects what compiler to use for each, and the resulting
-objects can be linked, taking advantage of C/C++ backwards compatibility.
+A test fails if its program returns an integer greater than zero.
 
-### Automated Testing
-
-Just place the test sources in `TESTDIR` and run `make test`. A test fails if
-it returns an integer greater than zero.
-
-By default `valgrind` is used on each test. This can be changed or removed in
-the `TESTER` variable.
-
-Currently, additional objects are not linked, so each needed source must be
-`#include`'d.
-
-### Environment Variables
+## Environment Variables
 
 Common variables usually set by package managers, `CFLAGS`, `CXXFLAGS`,
 `LDFLAGS`, `PREFIX` and `DESTDIR`, can be overriden by exporting them to Make.
-
-### Local Libraries
-
-By default, `LIBSDIR` is scanned for sources to be compiled. If this isn't
-desired, a simple solution is pointing `LIBSDIR` to `SRCDIR`.
 

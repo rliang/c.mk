@@ -1,7 +1,7 @@
 #ifndef BAR_H
 #define BAR_H
 
-void bar(void);
+int a = 0;
 
 #endif /* BAR_H */
 
