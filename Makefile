@@ -20,26 +20,26 @@ TESTS := $(patsubst test/%.c, build/test/%.out, $(TSRCS))
 release: build/release/$(TARGET)
 build/release/$(TARGET): $(ROBJS)
 	$(CC) $(RLDFLAGS) $(LDFLAGS) -o $@ $^
-build/release/%.o: src/%.c | build/release
+build/release/%.o: src/%.c | $(sort $(dir $(ROBJS)))
 	$(CC) $(RCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
 debug: build/debug/$(TARGET)
 build/debug/$(TARGET): $(DOBJS)
 	$(CC) $(DLDFLAGS) $(LDFLAGS) -Llibs -o $@ $^
-build/debug/%.o: src/%.c | build/debug
+build/debug/%.o: src/%.c | $(sort $(dir $(DOBJS)))
 	$(CC) $(DCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
 test: $(TESTS)
 build/test/%.out: $(TOBJS) test/%.c
 	$(CC) $(TCFLAGS) $(CFLAGS) $(TLDFLAGS) $(LDFLAGS) -o $@ $^
 	./$@
-build/test/%.o: src/%.c | build/test
+build/test/%.o: src/%.c | $(sort $(dir $(TOBJS)))
 	$(CC) $(TCFLAGS) $(CFLAGS) -MMD -MP -D'main(a)'='unused(a)' -o $@ -c $<
 
--include $(addsuffix .d, $(basename $(ROBJS) $(DOBJS) $(TOBJS)))
-
-build/release build/debug build/test:
+$(sort $(dir $(ROBJS) $(DOBJS) $(TOBJS) $(TESTS))):
 	mkdir -p $@
+
+-include $(addsuffix .d, $(basename $(ROBJS) $(DOBJS) $(TOBJS)))
 
 install: release
 	install -d $(PREFIX)/$(DESTDIR)
