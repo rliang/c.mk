@@ -10,10 +10,10 @@ LDFLAGS  += -Llibs
 PREFIX   ?= /usr/local/
 DESTDIR  ?= lib
 
-OSRCS := $(wildcard src/*.c src/**/*.c)
+OSRCS := $(shell find src -name '*.c')
 ROBJS := $(patsubst src/%.c, build/release/%.o, $(OSRCS))
 DOBJS := $(patsubst src/%.c, build/debug/%.o, $(OSRCS))
-TSRCS := $(wildcard test/*.c test/**/*.c)
+TSRCS := $(shell find test -name '*.c')
 TOBJS := $(patsubst src/%.c, build/test/%.o, $(OSRCS))
 TESTS := $(patsubst test/%.c, build/test/%.out, $(TSRCS))
 
