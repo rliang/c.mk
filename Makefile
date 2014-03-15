@@ -7,7 +7,7 @@ TCFLAGS  := -O0 -g
 TLDFLAGS :=
 CFLAGS   += -Ilibs
 LDFLAGS  += -Llibs
-PREFIX   ?= /usr/local/
+PREFIX   ?= /usr/local
 DESTDIR  ?= lib
 
 OSRCS := $(shell find src -name '*.c')
