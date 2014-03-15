@@ -17,23 +17,23 @@ TSRCS := $(wildcard test/*.c test/**/*.c)
 TOBJS := $(patsubst src/%.c, build/test/%.o, $(OSRCS))
 TESTS := $(patsubst test/%.c, build/test/%.out, $(TSRCS))
 
-release: build/release/$(TARGET)
+release: $(sort $(dir $(ROBJS))) build/release/$(TARGET)
 build/release/$(TARGET): $(ROBJS)
 	$(CC) $(RLDFLAGS) $(LDFLAGS) -o $@ $^
-build/release/%.o: src/%.c | $(sort $(dir $(ROBJS)))
+build/release/%.o: src/%.c
 	$(CC) $(RCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
-debug: build/debug/$(TARGET)
+debug: $(sort $(dir $(DOBJS))) build/debug/$(TARGET)
 build/debug/$(TARGET): $(DOBJS)
 	$(CC) $(DLDFLAGS) $(LDFLAGS) -Llibs -o $@ $^
-build/debug/%.o: src/%.c | $(sort $(dir $(DOBJS)))
+build/debug/%.o: src/%.c
 	$(CC) $(DCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
-test: $(TESTS)
+test: $(sort $(dir $(TOBJS))) $(TESTS)
 build/test/%.out: $(TOBJS) test/%.c
 	$(CC) $(TCFLAGS) $(CFLAGS) $(TLDFLAGS) $(LDFLAGS) -o $@ $^
 	./$@
-build/test/%.o: src/%.c | $(sort $(dir $(TOBJS)))
+build/test/%.o: src/%.c
 	$(CC) $(TCFLAGS) $(CFLAGS) -MMD -MP -D'main(a)'='unused(a)' -o $@ -c $<
 
 $(sort $(dir $(ROBJS) $(DOBJS) $(TOBJS) $(TESTS))):
