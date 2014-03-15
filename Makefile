@@ -1,5 +1,5 @@
 TARGET   := libfoo.so
-RCFLAGS  := -Os -march=native -fPIC
+RCFLAGS  := -Os -march=native -DNDEBUG -fPIC
 RLCFLAGS := -s -shared
 DCFLAGS  := -O0 -g -fPIC
 DLDFLAGS := -shared
