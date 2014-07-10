@@ -7,7 +7,7 @@ TCFLAGS  := -O0 -g
 TLDFLAGS :=
 CFLAGS   += -Ilibs
 LDFLAGS  += -Llibs
-PREFIX   ?= /usr/local
+PREFIX   ?= .
 DESTDIR  ?= lib
 
 OSRCS := $(shell find src -name '*.c')
@@ -25,7 +25,7 @@ build/release/%.o: src/%.c
 
 debug: $(dir $(DOBJS)) build/debug/$(TARGET)
 build/debug/$(TARGET): $(DOBJS)
-	$(CC) $(DLDFLAGS) $(LDFLAGS) -Llibs -o $@ $^
+	$(CC) $(DLDFLAGS) $(LDFLAGS) -o $@ $^
 build/debug/%.o: src/%.c
 	$(CC) $(DCFLAGS) $(CFLAGS) -MMD -MP -o $@ -c $<
 
